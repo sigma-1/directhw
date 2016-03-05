@@ -1,1 +1,5 @@
 DerivedData/*
+*.a
+*.dylib
+*.o
+.patched 
