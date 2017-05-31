@@ -42,6 +42,8 @@ class DirectHWUserClient:public IOUserClient {
 		kPrepareMap,
 		kReadMSR,
 		kWriteMSR,
+		kReadCpuId,
+		kReadMem,
 		kNumberOfMethods
 	};
 
@@ -62,6 +64,19 @@ class DirectHWUserClient:public IOUserClient {
 		UInt32 hi;
 		UInt32 lo;
 	} msrcmd_t;
+
+    typedef struct {
+        uint32_t core;
+        uint32_t eax;
+        uint32_t ecx;
+        uint32_t output[4];
+    } cpuid_t;
+
+	typedef struct {
+		uint32_t core;
+		uint64_t addr;
+		uint32_t data;
+	} readmem_t;
 
       public:
 	virtual bool initWithTask(task_t task, void *securityID, UInt32 type);
@@ -100,12 +115,24 @@ class DirectHWUserClient:public IOUserClient {
 				  IOByteCount inStructSize,
 				  IOByteCount * outStructSize);
 
+	virtual IOReturn ReadCpuId(cpuid_t * inStruct, cpuid_t * outStruct,
+				  IOByteCount inStructSize,
+				  IOByteCount * outStructSize);
+
+	  virtual IOReturn ReadMem(readmem_t * inStruct, readmem_t * outStruct,
+				IOByteCount inStructSize,
+				IOByteCount * outStructSize);
+
       private:
 	task_t fTask;
 	UInt64 LastMapAddr, LastMapSize;
 
 	static void MSRHelperFunction(void *data);
+    static void CPUIDHelperFunction(void *data);
+    static void ReadMemHelperFunction(void *data);
 	typedef struct { msrcmd_t *in, *out; bool Read; } MSRHelper;
+	typedef struct { cpuid_t *in, *out; } CPUIDHelper;
+	typedef struct { readmem_t *in, *out; } ReadMemHelper;
 	static inline void cpuid(uint32_t op1, uint32_t op2, uint32_t *data);
 };
 

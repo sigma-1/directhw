@@ -31,6 +31,8 @@ void outb(unsigned char val, unsigned short addr);
 void outw(unsigned short val, unsigned short addr);
 void outl(unsigned int val, unsigned short addr);
 
+int readmem32(uint64_t addr, uint32_t* data);
+
 void *map_physical(uint64_t phys_addr, size_t len);
 void unmap_physical(void *virt_addr, size_t len);
 
@@ -38,6 +40,8 @@ typedef struct { uint32_t hi, lo; } msr_t;
 msr_t rdmsr(int addr);
 int wrmsr(int addr, msr_t msr);
 int logical_cpu_select(int cpu);
+int rdcpuid(uint32_t eax, uint32_t ecx, uint32_t cpudata[4]);
+int darwin_ioread(int pos, unsigned char * buf, int len);
 
 #define INVALID_MSR_LO 0x63744857
 #define INVALID_MSR_HI 0x44697265

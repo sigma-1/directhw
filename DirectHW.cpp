@@ -21,11 +21,11 @@
 #include <IOKit/IOKitKeys.h>
 #include <IOKit/IOMemoryDescriptor.h>
 #include <architecture/i386/pio.h>
+#include <stdint.h>
 
 #include "DirectHW.hpp"
 
-#undef DEBUG_KEXT
-//#define DEBUG_KEXT
+#define DEBUG_KEXT
 
 #define super IOService
 
@@ -55,7 +55,9 @@ const IOExternalMethod DirectHWUserClient::fMethods[kNumberOfMethods] = {
 	{0, (IOMethod) & DirectHWUserClient::WriteIO, kIOUCStructIStructO, sizeof(iomem_t), sizeof(iomem_t)},
 	{0, (IOMethod) & DirectHWUserClient::PrepareMap, kIOUCStructIStructO, sizeof(map_t), sizeof(map_t)},
 	{0, (IOMethod) & DirectHWUserClient::ReadMSR, kIOUCStructIStructO, sizeof(msrcmd_t), sizeof(msrcmd_t)},
-	{0, (IOMethod) & DirectHWUserClient::WriteMSR, kIOUCStructIStructO, sizeof(msrcmd_t), sizeof(msrcmd_t)}
+	{0, (IOMethod) & DirectHWUserClient::WriteMSR, kIOUCStructIStructO, sizeof(msrcmd_t), sizeof(msrcmd_t)},
+	{0, (IOMethod) & DirectHWUserClient::ReadCpuId, kIOUCStructIStructO, sizeof(cpuid_t), sizeof(cpuid_t)},
+	{0, (IOMethod) & DirectHWUserClient::ReadMem, kIOUCStructIStructO, sizeof(readmem_t), sizeof(readmem_t)},
 };
 
 bool DirectHWUserClient::initWithTask(task_t task, void *securityID, UInt32 type)
@@ -114,7 +116,37 @@ bool DirectHWUserClient::start(IOService * provider)
 	} else {
 		IOLog("DirectHW: Could not start client.\n");
 	}
-	return success;
+
+    uint32_t cr0, cr2, cr3;
+#ifdef __x86_64__
+__asm__ __volatile__ (
+                      "mov %%cr0, %%rax\n\t"
+                      "mov %%eax, %0\n\t"
+                      "mov %%cr2, %%rax\n\t"
+                      "mov %%eax, %1\n\t"
+                      "mov %%cr3, %%rax\n\t"
+                      "mov %%eax, %2\n\t"
+                      : "=m" (cr0), "=m" (cr2), "=m" (cr3)
+                      : /* no input */
+                      : "%rax"
+                      );
+#elif defined(__i386__)
+__asm__ __volatile__ (
+                      "mov %%cr0, %%eax\n\t"
+                      "mov %%eax, %0\n\t"
+                      "mov %%cr2, %%eax\n\t"
+                      "mov %%eax, %1\n\t"
+                      "mov %%cr3, %%eax\n\t"
+                      "mov %%eax, %2\n\t"
+                      : "=m" (cr0), "=m" (cr2), "=m" (cr3)
+                      : /* no input */
+                      : "%eax"
+                      );
+#endif
+    IOLog("DirectHW: cr0 = 0x%8.8X\n", cr0);
+    IOLog("DirectHW: cr2 = 0x%8.8X\n", cr2);
+    IOLog("DirectHW: cr3 = 0x%8.8X\n", cr3);
+    return success;
 }
 
 void DirectHWUserClient::stop(IOService *provider)
@@ -248,6 +280,37 @@ DirectHWUserClient::cpuid(uint32_t op1, uint32_t op2, uint32_t *data)
 }
 
 void
+DirectHWUserClient::CPUIDHelperFunction(void *data)
+{
+	CPUIDHelper * cpuData = (CPUIDHelper *)data;
+    cpuData->out->core = -1;
+    if (cpuData->in->core != cpu_number())
+        return;
+    cpuid(cpuData->in->eax, cpuData->in->ecx, cpuData->out->output);
+    cpuData->out->eax = cpuData->in->eax;
+    cpuData->out->ecx = cpuData->in->ecx;
+    cpuData->out->core = cpuData->in->core;
+}
+
+void
+DirectHWUserClient::ReadMemHelperFunction(void *data)
+{
+	ReadMemHelper * memData = (ReadMemHelper *)data;
+    memData->out->core = -1;
+    if (memData->in->core != cpu_number())
+        return;
+    uint32_t out;
+    uint64_t addr;
+	__asm__ ("mov %1,%%eax\t\n"
+             "mov %%eax, %0\t\n"
+		: "=m" (out)
+		: "m" (addr)
+        : "%eax"
+    );
+	memData->out->data = out;
+}
+
+void
 DirectHWUserClient::MSRHelperFunction(void *data)
 {
 	MSRHelper * MSRData = (MSRHelper *)data;
@@ -296,6 +359,50 @@ DirectHWUserClient::MSRHelperFunction(void *data)
 
 	outStruct->index = inStruct->index;
 	outStruct->core = inStruct->core;
+}
+
+IOReturn
+DirectHWUserClient::ReadCpuId(cpuid_t * inStruct, cpuid_t * outStruct,
+				IOByteCount inStructSize,
+				IOByteCount * outStructSize)
+{
+	if (fProvider == NULL || isInactive()) {
+		return kIOReturnNotAttached;
+	}
+
+	CPUIDHelper cpuidData = { inStruct, outStruct};
+	mp_rendezvous(NULL, (void (*)(void *))CPUIDHelperFunction, NULL,
+			(void *)&cpuidData);
+
+	*outStructSize = sizeof(cpuid_t);
+
+	if (outStruct->core != inStruct->core)
+		return kIOReturnIOError;
+
+	return kIOReturnSuccess;
+}
+
+IOReturn
+DirectHWUserClient::ReadMem(readmem_t * inStruct, readmem_t * outStruct,
+				IOByteCount inStructSize,
+				IOByteCount * outStructSize)
+{
+	if (fProvider == NULL || isInactive()) {
+		return kIOReturnNotAttached;
+	}
+
+    if (cpu_number() != inStruct->core)
+		 return kIOReturnIOError;
+    outStruct->core = inStruct->core;
+	ReadMemHelper memData = { inStruct, outStruct};
+	mp_rendezvous(NULL, (void (*)(void *))ReadMemHelperFunction, NULL,
+			(void *)&memData);
+
+	*outStructSize = sizeof(readmem_t);
+
+	if (outStruct->core != inStruct->core)
+		return kIOReturnIOError;
+	return kIOReturnSuccess;
 }
 
 IOReturn
