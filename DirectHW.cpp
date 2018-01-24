@@ -261,7 +261,7 @@ DirectHWUserClient::MSRHelperFunction(void *data)
 	uint32_t cpuiddata[4];
 
 	cpuid(1, 0, cpuiddata);
-	bool have_ht = ((cpuiddata[3] & (1 << 28)) != 0);
+	//bool have_ht = ((cpuiddata[3] & (1 << 28)) != 0);
 	uint32_t core_id = cpuiddata[1] >> 24;
 
 	cpuid(11, 0, cpuiddata);

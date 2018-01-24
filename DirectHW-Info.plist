@@ -23,7 +23,7 @@
 		<key>DirectHWUserClient</key>
 		<dict>
 			<key>CFBundleIdentifier</key>
-			<string>com.coresystems.driver.DirectHW</string>
+			<string>com.apple.driver.DirectHW</string>
 			<key>IOClass</key>
 			<string>DirectHWService</string>
 			<key>IOMatchCategory</key>

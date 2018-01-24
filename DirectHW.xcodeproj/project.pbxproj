@@ -130,7 +130,7 @@
 		5D99328B0D0F94EE00760F43 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0900;
 			};
 			buildConfigurationList = 5D99328E0D0F94EE00760F43 /* Build configuration list for PBXProject "DirectHW" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -187,52 +187,40 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		5D99328C0D0F94EE00760F43 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				ENABLE_TESTABILITY = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
-				STRIPFLAGS = "-no_uuid";
-				VALID_ARCHS = i386;
-			};
-			name = Debug;
-		};
 		5D99328D0D0F94EE00760F43 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				STRIPFLAGS = "-no_uuid";
-				VALID_ARCHS = i386;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
-		};
-		5D9932D90D0F97D100760F43 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				INFOPLIST_FILE = "DirectHW-Info.plist";
-				INSTALL_GROUP = wheel;
-				INSTALL_OWNER = root;
-				MODULE_NAME = com.coresystems.driver.DirectHW;
-				MODULE_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.coresystems.driver.DirectHW;
-				PRODUCT_NAME = DirectHW;
-				SDKROOT = macosx;
-				VALID_ARCHS = x86_64;
-				WRAPPER_EXTENSION = kext;
-				ZERO_LINK = NO;
-			};
-			name = Debug;
 		};
 		5D9932DA0D0F97D100760F43 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -246,7 +234,7 @@
 				INSTALL_OWNER = root;
 				MODULE_NAME = com.coresystems.driver.DirectHW;
 				MODULE_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.coresystems.driver.DirectHW;
+				PRODUCT_BUNDLE_IDENTIFIER = com.apple.driver.DirectHW;
 				PRODUCT_NAME = DirectHW;
 				SDKROOT = macosx;
 				VALID_ARCHS = x86_64;
@@ -254,29 +242,6 @@
 				ZERO_LINK = NO;
 			};
 			name = Release;
-		};
-		FDC4F2B60E923DF00006B2A5 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = NO;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = A;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				INFOPLIST_FILE = "DirectHW-Framework-Info.plist";
-				INSTALL_PATH = "$(SYSTEM_LIBRARY_DIR)/Frameworks";
-				OTHER_LDFLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = com.coresystems.DirectHW;
-				PRODUCT_NAME = DirectHW;
-				SDKROOT = macosx;
-				VALID_ARCHS = x86_64;
-				ZERO_LINK = YES;
-			};
-			name = Debug;
 		};
 		FDC4F2B70E923DF00006B2A5 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -306,7 +271,6 @@
 		5D99328E0D0F94EE00760F43 /* Build configuration list for PBXProject "DirectHW" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				5D99328C0D0F94EE00760F43 /* Debug */,
 				5D99328D0D0F94EE00760F43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -315,7 +279,6 @@
 		5D9932DB0D0F97D100760F43 /* Build configuration list for PBXNativeTarget "KEXT" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				5D9932D90D0F97D100760F43 /* Debug */,
 				5D9932DA0D0F97D100760F43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -324,7 +287,6 @@
 		FDC4F2C00E923E2B0006B2A5 /* Build configuration list for PBXNativeTarget "DirectHW" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				FDC4F2B60E923DF00006B2A5 /* Debug */,
 				FDC4F2B70E923DF00006B2A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
