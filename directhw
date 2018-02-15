@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# DirectHW kextload/unload helper script
+
+function usage(){
+	echo "Usage: directhw [<switches>]"
+	echo
+	echo "Options:"
+	echo "    -l               Load directhw.kext"
+	echo "    -u               Unload directhw.kext"
+	echo "    -h               Show this help screen"
+}
+
+while getopts ":luh:" opt ; do
+	case ${opt} in
+		l)	sudo kextload $HOME/usr/opt/DirectHW/Extensions/DirectHW.kext
+			exit 1
+			;;
+		u)	sudo kextunload $HOME/usr/opt/DirectHW/Extensions/DirectHW.kext
+			exit 1
+			;;
+		h)	usage
+			;;
+		\?) echo "directhw: illegal option -${OPTARG}"
+			;;
+ 	esac
+done
+
+if [ -z "${l}" ] || [ -z "${u}" ] || [ -z "${h}" ]; then
+    usage
+fi
