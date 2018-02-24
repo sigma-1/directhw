@@ -1,5 +1,4 @@
 DerivedData/*
-*.a
-*.dylib
+build/*
 *.o
-.patched 
+.DS_Store

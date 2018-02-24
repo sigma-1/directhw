@@ -10,3 +10,11 @@ DirectHW is a software compatibility layer for Mac OS X. It provides a kernel dr
 This package was originally intended to get the coreboot® utilities running on Mac OS X. But you're encouraged to use it for many more opportunities.
 
 Visit http://www.coresystems.de/ for more information.
+
+### Building/Installing
+
+Disable SIP if it's not already disabled. Then simply:
+
+	git clone https://github.com/sigma-1/directhw.git
+	cd directhw
+	make && sudo make install

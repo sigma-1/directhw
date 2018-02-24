@@ -16,62 +16,32 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-LIBNAME := DirectHW
-all: dmg
+all: main libs
 
-userland: lib$(LIBNAME).dylib lib$(LIBNAME).a
-
-lib$(LIBNAME).dylib: DirectHW.c DirectHW.h
-	$(CC) DirectHW.c -dynamiclib -framework IOKit -o lib$(LIBNAME).dylib
-
-lib$(LIBNAME).a: DirectHW.c DirectHW.h
-	$(CC) -static -c DirectHW.c -o lib$(LIBNAME).a
-
-prepare:
-	if [ ! -r .patched ]; then \
-		test `uname -r  | cut -f1 -d\.` -lt 10 && \
-			patch -p0 < DirectHW-i386-only.diff || echo "Not patching."; \
-	fi
-	touch .patched
-
-build: prepare
+main:
 	xcodebuild -alltargets
 
-install: build
-	sudo xcodebuild -alltargets DSTROOT=`pwd`/build/DirectHW install
+libs: DirectHW.c DirectHW.h
+	$(CC) DirectHW.c -dynamiclib -framework IOKit -o libDirectHW.dylib
+	$(CC) -static -c DirectHW.c -o libDirectHW.a
+	mv libDirectHW.dylib build/Release/libDirectHW$(LIBNAME).dylib
+	mv libDirectHW.a build/Release/libDirectHW.a
 
-package: install
-	/Developer/usr/bin/packagemaker -v --doc DirectHW.pmdoc \
-		--id com.coresystems.DirectHW --out build/DirectHW.pkg
-
-dmg: package
-	rm -rf DirectHW.dmg
-	rm -rf out
-	mkdir out
-	cp -r build/DirectHW.pkg out/Install\ DirectHW.pkg
-	cp -r ReadMe.rtf out/Read\ Me.rtf
-	/Developer/Tools/SetFile -a E out/Install\ DirectHW.pkg
-	/Developer/Tools/SetFile -a E out/Read\ Me.rtf
-	../create-dmg/create-dmg --window-size 447 337 \
-		--background background.png --icon-size 80 \
-		--volname "Install DirectHW" \
-		--icon "Install DirectHW.pkg" 142 64 \
-		--icon "Read Me.rtf" 310 64 \
-		DirectHW.dmg out
-
-load: install
-	cd build/DirectHW/System/Library/Extensions; sudo kextunload -v DirectHW.kext; sudo kextload -v DirectHW.kext
-
-installer: package
-	rm -rf ~/Desktop/DirectHW.pkg
-	cp -r build/DirectHW.pkg ~/Desktop
+install:
+	sudo mkdir -p /usr/local/lib
+	sudo cp -r build/Release/DirectHW.kext /System/Library/Extensions/DirectHW.kext
+	sudo cp -r build/Release/DirectHW.framework /System/Library/Frameworks/DirectHW.framework
+	sudo cp -r build/Release/libDirectHW.a /usr/local/lib/libDirectHW.a
+	sudo cp -r build/Release/libDirectHW.dylib /usr/local/lib/libDirectHW.dylib
+	sudo chmod -R 755 /System/Library/Extensions/DirectHW.kext
+	sudo chmod -R 755 /System/Library/Frameworks/DirectHW.framework
+	sudo chmod 644 /usr/local/lib/libDirectHW.a
+	sudo chmod 644 /usr/local/lib/libDirectHW.dylib
+	sudo chown -R root:wheel /System/Library/Extensions/DirectHW.kext
+	sudo chown -R root:wheel /System/Library/Frameworks/DirectHW.framework
+	sudo kextunload -v /System/Library/Extensions/DirectHW.kext
+	sudo kextload -v /System/Library/Extensions/DirectHW.kext
+	sudo kextcache -f -update-volume /
 
 clean:
-	rm -rf out lib$(LIBNAME).dylib lib$(LIBNAME).a
-	sudo rm -rf build/Release build/DirectHW.build build/DirectHW build/DirectHW.pkg
-
-distclean: clean
-	rm DirectHW.dmg
-
-.PHONY: prepare build install package dmg load copy clean distclean userland
-
+	rm -rf build
